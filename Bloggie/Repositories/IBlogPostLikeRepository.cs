@@ -8,6 +8,6 @@ namespace Bloggie.Webb.Repositories
 
         Task<BlogPostLike> AddLikeForBlog(BlogPostLike blogPostLike);
 
-        Task<int> GetLikesForBlog(Guid BlogPostId);
+        Task<IEnumerable<BlogPostLike>> GetLikesForBlog(Guid BlogPostId);
     }
 }

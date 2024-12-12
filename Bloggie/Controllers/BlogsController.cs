@@ -13,6 +13,7 @@ namespace Bloggie.Webb.Controllers
         private readonly SignInManager<IdentityUser> signInManager;
         private readonly UserManager<IdentityUser> userManager;
         private readonly IBlogPostCommentRepository blogPostCommentRepository;
+        private bool liked = false;
 
         public BlogsController(IBlogPostRepository blogPostRepository,
             IBlogPostLikeRepository blogPostLikeRepository,SignInManager<IdentityUser> signInManager,
@@ -38,12 +39,13 @@ namespace Bloggie.Webb.Controllers
 
                 if (signInManager.IsSignedIn(User))
                 {
-                    var LikesForBlog = await blogPostLikeRepository.GetLikesForBlog(blogPost.Id);
+                    var likesForBlog = await blogPostLikeRepository.GetLikesForBlog(blogPost.Id);
 
                     var userId = userManager.GetUserId(User);
                     if (userId != null)
                     {
-                        //var likeFromUser = LikesForBlog.FirstOrDefault(X => userId == blogPost.Id);
+                        var likeFromUser = likesForBlog.FirstOrDefault(x => x.UserId == Guid.Parse(userId));
+                        liked = likeFromUser != null;
 
 
                     }
@@ -67,6 +69,7 @@ namespace Bloggie.Webb.Controllers
 
                 }
                 blogDetailsViewModel = new BlogDetailsViewModel
+
                 {
                     Id = blogPost.Id,
                     Heading = blogPost.Heading,
@@ -80,6 +83,7 @@ namespace Bloggie.Webb.Controllers
                     Visible = blogPost.Visible,
                     Tags = blogPost.Tags,
                     TotalLikes = totalLikes,
+                    Liked = liked,
                     Comments = blogCommentsForView
                 };
             }
@@ -100,7 +104,7 @@ namespace Bloggie.Webb.Controllers
                 };
 
                   await blogPostCommentRepository.AddAsync(domainModel);
-                return RedirectToAction("Index", "Home", new { urlHandle = blogDetailsViewModel.UrlHandle });
+                return RedirectToAction("Index", "blogs", new { urlHandle = blogDetailsViewModel.UrlHandle });
            }
             return View();
         }
